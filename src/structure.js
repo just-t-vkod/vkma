@@ -11,6 +11,10 @@ const structure = [
 			{
 				id: "placeholder",
 				hash: '/placeholder'
+			},
+
+			{
+				id: 'intro',
 			}
 		]
 	},

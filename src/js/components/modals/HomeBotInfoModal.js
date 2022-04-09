@@ -1,20 +1,43 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { useSelector } from "react-redux";
 import { withRouter } from '@reyzitwo/react-router-vkminiapps';
 import {
-    Cell, 
-    List, 
-    Avatar, 
-    InfoRow, 
-    ModalPage, 
-    ModalPageHeader, 
+    ModalPage,
+    ModalPageHeader,
     PanelHeaderButton,
-    IOS
+    IOS, Text, FormItem, Input, Div, Button
 } from "@vkontakte/vkui";
 import { Icon24Dismiss, Icon24Cancel } from '@vkontakte/icons'
+import bridge from "@vkontakte/vk-bridge";
 
 function BotsListModal({ nav, router }) {
     const platform = useSelector((state) => state.main.platform)
+    const [players, setPlayers] = useState('')
+    const [status, setStatus] = useState('default')
+
+    async function onChange(e) {
+        const {name, value} = e.currentTarget
+
+        if (name === 'players') {
+            setPlayers(value)
+        }
+
+        setStatus('default')
+    }
+
+    useEffect(() =>
+        {bridge.send("VKWebAppStorageSet", {key: 'players', value: ''})}, []
+    )
+
+    async function sendPlayers() {
+        if (players in [3, 4, 5, 6, 7, 8]) {
+            bridge.send("VKWebAppStorageSet", {key: 'players', value: players})
+            router.toBack()
+        }
+        else {
+            setStatus('error')
+        }
+    }
 
     return (
         <ModalPage
@@ -33,38 +56,36 @@ function BotsListModal({ nav, router }) {
                         </PanelHeaderButton>
                     }
                 >
-                    Информация о сообществе
+                    Информация
                 </ModalPageHeader>
             }
             onClose={() => router.toBack()}
             settlingHeight={100}
         >
-            <Cell
-                description="Описание"
-                before={<Avatar size={40} src="https://vk.com/images/community_100.png?ava=1"/>}
-            >
-                Название
-            </Cell>
+            <Div>
+                <Text weight={5}>
+                    Привет! Это игра "Шпион". Пожалуйста, введите количество игроков ниже (от 3 до 8).
+                </Text>
+            </Div>
 
-            <List>
-                <Cell>
-                    <InfoRow header="Подписчиков">
-                            8800
-                    </InfoRow>
-                </Cell>
-
-                <Cell>
-                    <InfoRow header="Записей">
-                        555
-                    </InfoRow>
-                </Cell>
-
-                <Cell>
-                    <InfoRow header="Рейтинг">
-                        3535
-                    </InfoRow>
-                </Cell>
-            </List>
+            <FormItem status={status} bottom={status === 'error' && 'Введите число от 3 до 8.'}>
+                <Input
+                    value={players}
+                    type='number'
+                    placeholder='Введите число...'
+                    onChange={(e) => onChange(e)}
+                    name='players'
+                />
+            </FormItem>
+            <Div>
+                <Button
+                    stretched
+                    size='l'
+                    onClick={() => sendPlayers()}
+                >
+                    Готово
+                </Button>
+            </Div>
         </ModalPage>
     );
 }

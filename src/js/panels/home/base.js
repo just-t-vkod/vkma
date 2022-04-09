@@ -1,130 +1,63 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { withRouter } from '@reyzitwo/react-router-vkminiapps';
 
 import {
-    Div,  
-    Alert, 
-    Group, 
-    Button, 
+    Card,
+    FormItem,
+    Group, Header,
     PanelHeader,
-    ScreenSpinner,
-    Snackbar,
-    Avatar
+    Div, CardGrid
 } from '@vkontakte/vkui'
-import { Icon16Done } from '@vkontakte/icons'
-import img from '../../../svg/chel.svg'
+
+import names from '../../../names'
+import bridge from "@vkontakte/vk-bridge";
 
 function HomePanelBase({ router }) {
-    const [showImg, setShowImg] = useState(false)
     const [snackbar, setSnackbar] = useState(null)
+    const [locations, setLocations] = useState([])
+    
+    async function getLocations() {
+        var locations = []
 
-    function openAlert() {
-        router.toPopout(
-            <Alert
-                actions={[{
-                    title: 'Нет',
-                    autoclose: true,
-                    mode: 'cancel',
-                }, {
-                    title: 'Да',
-                    autoclose: true,
-                    mode: 'destructive',
-                    action: () => setShowImg(true)
-                }]}
-                onClose={() => router.toPopout()}
-                header='Вопрос значит'
-                text='Вас роняли в детстве?'
-            />
-        )
+        for (var i = 0; i <= 29; i++) {
+            let loc = `https://meme-police.ru/spyfall//location/spyfall1/${i}.jpg`
+            locations.push(loc)
+        }
+
+        setLocations(locations)
     }
 
-    async function openSpinner() {
-        router.toPopout(<ScreenSpinner/>)
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        router.toPopout()
+    async function getUserRole() {
+        
     }
-
-    function openSnackbar() {
-        setSnackbar(
-            <Snackbar
-                layout='vertical'
-                onClose={() => setSnackbar(null)}
-                action='Например кнопка'
-                before={
-                    <Avatar size={24} style={{ background: 'var(--accent)' }}> 
-                        <Icon16Done fill='#fff'/> 
-                    </Avatar>
-                }
-            >
-                Какой-то текст
-            </Snackbar>
-        )
-    }
+    
+    useEffect(
+        () => {getLocations();}, []
+    )
 
     return (
         <>
-            <PanelHeader separator={false}>Главная</PanelHeader>
+            <PanelHeader separator>Шпион</PanelHeader>
             <Group>
                 <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => router.toPanel('placeholder')}
-                    >
-                        Открыть Panel
-                    </Button>
+                    <Card className='location' mode='outline'>
+                        <FormItem top='Ваша роль'>
+                            
+                        </FormItem>
+                    </Card>
                 </Div>
 
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => openAlert()}
-                    >
-                        Открыть Alert
-                    </Button>
-                </Div>
-
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => openSpinner()}
-                    >
-                        Открыть ScreenSpinner
-                    </Button>
-                </Div>
-
-                <Div>
-                    <Button
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => openSnackbar()}
-                    >
-                        Открыть Snackbar
-                    </Button>
-                </Div>
-
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => router.toModal('botsList')}
-                    >
-                        Открыть ModalPage
-                    </Button>
-                </Div>
-
-                {showImg && 
-                    <Div className='div-center'>
-                        <img src={img} alt="чел"/>
-                    </Div>
-                }
+            </Group>
+            <Group header={<Header mode='secondary'>Локации</Header> }>
+                <CardGrid size='s'>
+                    {locations.map((el, index) => {
+                        return(
+                            <FormItem top={names[index]}>
+                                <img src={el} width={145} alt='location' height={120}></img>
+                            </FormItem>
+                        )
+                    })}
+                </CardGrid>
             </Group>
             {snackbar}
         </>

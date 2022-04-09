@@ -1,4 +1,4 @@
-import React, {lazy, Suspense, useEffect} from 'react';
+import React, {lazy, Suspense, useEffect, useState} from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { withRouter } from '@reyzitwo/react-router-vkminiapps';
 
@@ -15,14 +15,11 @@ import {
   ScreenSpinner,
   usePlatform,
   VKCOM,
-  withAdaptivity,
+  withAdaptivity, platform,
 } from "@vkontakte/vkui";
 import bridge from "@vkontakte/vk-bridge";
 
 import { set } from './js/reducers/mainReducer';
-
-import DesktopNavigation from './js/components/navigation/desktop';
-import MobailNavigation from './js/components/navigation/mobail';
 
 import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
 import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
@@ -30,32 +27,45 @@ import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
 const HomePanelBase = lazy(() => import('./js/panels/home/base'));
 const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
 const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
+const Intro = lazy(() => import('./js/panels/home/Intro'))
 
 const App = withAdaptivity(({ viewWidth, router }) => {
   const mainStorage = useSelector((state) => state.main)
   const dispatch = useDispatch()
+  const [scheme, setScheme] = useState('light')
 
   dispatch(set({ key: 'isDesktop', value: viewWidth >= 3 }))
   dispatch(set({ key: 'platform', value: mainStorage.isDesktop ? VKCOM : usePlatform() }))
   dispatch(set({ key: 'hasHeader', value: mainStorage.isDesktop !== true }))
 
+  async function getAppScheme(platform) {
+    if (platform === 'vkcom') {
+      setScheme('vkcom_light')
+    } else {
+      bridge.subscribe((e) => {
+        if (e.detail.type === 'VKWebAppUpdateConfig') {
+          let data = e.detail.data.scheme
+          setScheme(data)
+        }
+      })
+      let appScheme = await bridge.send("VKWebAppGetConfig")
+      setScheme(appScheme.scheme)
+    }
+  }
+
   useEffect(() => {
-    bridge.subscribe(({ detail: { type, data } }) => {
-      if (type === 'VKWebAppUpdateConfig') {
-        dispatch(set({ key: 'theme', value: data.scheme }))
-      }
-    })
+    getAppScheme(platform())
   }, [])
 
   const modals = (
     <ModalRoot activeModal={router.modal} onClose={() => router.toBack()}>
       <HomeBotsListModal nav="botsList"/>
-      <HomeBotInfoModal nav="botInfo"/>
+      <HomeBotInfoModal nav="info"/>
     </ModalRoot>
   );
 
   return(
-    <ConfigProvider platform={mainStorage.platform} appearance={mainStorage.theme} isWebView>
+    <ConfigProvider platform={mainStorage.platform} scheme={scheme} isWebView>
       <AppRoot>
         <SplitLayout
           header={mainStorage.hasHeader && <PanelHeader separator={false} />}
@@ -64,12 +74,11 @@ const App = withAdaptivity(({ viewWidth, router }) => {
           <SplitCol
             animate={!mainStorage.isDesktop}
             spaced={mainStorage.isDesktop}
-            width={mainStorage.isDesktop ? '560px' : '100%'}
-            maxWidth={mainStorage.isDesktop ? '560px' : '100%'}
+            width={mainStorage.isDesktop ? '700px' : '100%'}
+            maxWidth={mainStorage.isDesktop ? '700px' : '100%'}
           >   
             <Epic 
-              activeStory={router.activeView} 
-              tabbar={!mainStorage.isDesktop && <MobailNavigation/>}
+              activeStory={router.activeView}
             >
               <View 
                 id='home'
@@ -86,6 +95,12 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                 <Panel id='placeholder'>
                   <Suspense fallback={<ScreenSpinner/>}>
                     <HomePanelPlaceholder/>
+                  </Suspense>
+                </Panel>
+
+                <Panel id='intro'>
+                  <Suspense fallback={<ScreenSpinner/>}>
+                    <Intro/>
                   </Suspense>
                 </Panel>
               </View>
@@ -105,7 +120,6 @@ const App = withAdaptivity(({ viewWidth, router }) => {
             </Epic>
           </SplitCol>
 
-          {mainStorage.isDesktop && <DesktopNavigation/>}
         </SplitLayout>
       </AppRoot>
     </ConfigProvider>

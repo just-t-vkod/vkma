@@ -15,17 +15,23 @@ import './css/main.css';
 import { AdaptivityProvider } from '@vkontakte/vkui';
 import bridge from '@vkontakte/vk-bridge';
 
-bridge.send('VKWebAppInit', {})
+async function startApp() {
 
-ReactDOM.render(
-    <Provider store={store}>
-        <AdaptivityProvider>
-            <Router structure={structure}>
-                <App/>
-            </Router>,
-        </AdaptivityProvider>
-    </Provider>,
-    document.getElementById('root')
-);
+    ReactDOM.render(
+        <Provider store={store}>
+            <AdaptivityProvider>
+                <Router structure={structure}>
+                    <App/>
+                </Router>,
+            </AdaptivityProvider>
+        </Provider>,
+        document.getElementById('root')
+    );
 
-import('./eruda.js').then(({ default: eruda }) => {}) 
+    bridge.send('VKWebAppInit', {})
+
+}
+
+import('./eruda.js').then(({ default: eruda }) => {})
+
+startApp()
