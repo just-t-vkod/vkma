@@ -21,13 +21,12 @@ import bridge from "@vkontakte/vk-bridge";
 
 import { set } from './js/reducers/mainReducer';
 
-import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
-import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
+import NewGame from './js/components/modals/newGame';
 
 const HomePanelBase = lazy(() => import('./js/panels/home/base'));
-const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
-const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
 const Intro = lazy(() => import('./js/panels/home/Intro'))
+const Start = lazy(() => import('./js/panels/home/start'))
+const Game = lazy(() => import('./js/panels/home/game'))
 
 const App = withAdaptivity(({ viewWidth, router }) => {
   const mainStorage = useSelector((state) => state.main)
@@ -59,8 +58,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
 
   const modals = (
     <ModalRoot activeModal={router.modal} onClose={() => router.toBack()}>
-      <HomeBotsListModal nav="botsList"/>
-      <HomeBotInfoModal nav="info"/>
+      <NewGame nav="newGame"/>
     </ModalRoot>
   );
 
@@ -92,28 +90,21 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                   </Suspense>
                 </Panel>
 
-                <Panel id='placeholder'>
-                  <Suspense fallback={<ScreenSpinner/>}>
-                    <HomePanelPlaceholder/>
-                  </Suspense>
-                </Panel>
-
                 <Panel id='intro'>
                   <Suspense fallback={<ScreenSpinner/>}>
                     <Intro/>
                   </Suspense>
                 </Panel>
-              </View>
 
-              <View 
-                id="profile"
-                activePanel={router.activePanel === 'route_modal' ? 'base' : router.activePanel}
-                popout={router.popout}
-                modal={modals}
-              >
-                <Panel id='base'>
+                <Panel id='start'>
                   <Suspense fallback={<ScreenSpinner/>}>
-                    <ProfilePanelBase/>
+                    <Start/>
+                  </Suspense>
+                </Panel>
+
+                <Panel id='game'>
+                  <Suspense fallback={<ScreenSpinner/>}>
+                    <Game/>
                   </Suspense>
                 </Panel>
               </View>

@@ -14,7 +14,12 @@ const structure = [
 			},
 
 			{
-				id: 'intro',
+				id: 'start',
+				hash: ''
+			},
+			{
+				id: 'game',
+				hash: ''
 			}
 		]
 	},

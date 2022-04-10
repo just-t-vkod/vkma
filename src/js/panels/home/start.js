@@ -11,13 +11,16 @@ import {
     FormItem,
     Input,
     Button,
-    MiniInfoCell,
-    Div
+    Div,
+    SimpleCell
 } from "@vkontakte/vkui";
-import { Icon56FaceIdOutline, Icon20UserSquareOutline, Icon20PlaceOutline  } from '@vkontakte/icons';
+import {
+    Icon28UserSquareOutline,
+    Icon56AccessibilityOutline, Icon28LocationOutline
+} from '@vkontakte/icons';
 import { set, setNameMember } from '../../reducers/game';
 
-function HomePanelPlaceholder({ router }) {
+function Start({ router }) {
     const isDesktop = useSelector((state => state.main.isDesktop))
     const gameStorage = useSelector((state) => state.game)
     const [isGot, setGot] = useState(false)
@@ -29,27 +32,27 @@ function HomePanelPlaceholder({ router }) {
                 separator={isDesktop}
                 left={<PanelHeaderBack onClick={() => router.toBack()}/>}
             >
-                Подготовка к игре
+                Начало игры
             </PanelHeader>
 
             {!isGot &&
             <Group>
                 <Placeholder
-                    icon={<Icon56FaceIdOutline />}
+                    icon={<Icon56AccessibilityOutline />}
                     header={`Привет, ${
                         gameStorage.members[gameStorage.activeMember].name.length === 0 ?
-                            `Игрок-${gameStorage.activeMember + 1}` :
+                            `Игрок ${gameStorage.activeMember + 1}` :
                             gameStorage.members[gameStorage.activeMember].name
                     }`}
                 >
-                    Введите свое имя, получите роль
-                    и передайте устройство другому игроку!
+                    Введите свой ник, получите себе роль
+                    и передайте устройство другим игрокам
                 </Placeholder>
 
                 <FormLayout>
                     <FormItem top={'Имя'}>
                         <Input
-                            placeholder={'Введите ваше имя...'}
+                            placeholder={'Введите ваш ник или имя'}
                             value={gameStorage.members[gameStorage.activeMember].name}
                             onChange={(e) =>
                                 dispatch(setNameMember({ index: gameStorage.activeMember, value: e.currentTarget.value }))
@@ -74,32 +77,29 @@ function HomePanelPlaceholder({ router }) {
 
             {isGot &&
             <Group>
-                <MiniInfoCell
-                    before={<Icon20UserSquareOutline/>}
-                    textLevel={'primary'}
-                    textWrap={'full'}
+                <SimpleCell
+                    before={<Icon28UserSquareOutline/>}
                 >
-                    {gameStorage.members[gameStorage.activeMember].name}, ваша роль: {" "}
+                    Ты - {gameStorage.members[gameStorage.activeMember].name}, <br/>
+                    Твоя роль: {" "}
                     <b>{gameStorage.members[gameStorage.activeMember].isSpy ?
                         "Шпион" :
                         gameStorage.members[gameStorage.activeMember].job
                     }</b>
-                </MiniInfoCell>
+                </SimpleCell>
 
                 {!gameStorage.members[gameStorage.activeMember].isSpy ?
                     <>
-                        <MiniInfoCell
-                            before={<Icon20PlaceOutline />}
-                            textLevel={'primary'}
-                            textWrap={'full'}
+                        <SimpleCell
+                            before={<Icon28LocationOutline/>}
                         >
-                            Локация: <b>{gameStorage.location.name}</b>
-                        </MiniInfoCell>
+                            Наша локация - <b>{gameStorage.location.name}</b>
+                        </SimpleCell>
 
                         <Div>
                             <img
                                 alt={gameStorage.location.name}
-                                src={gameStorage.location.photo}
+                                src={gameStorage.location.url}
                                 className={'imgStartGame'}
                             />
                         </Div>
@@ -127,7 +127,7 @@ function HomePanelPlaceholder({ router }) {
                             setGot(false)
                         }}
                     >
-                        {gameStorage.members.length === gameStorage.activeMember + 1 ? 'Начать игру!' : 'Следующий'}
+                        {gameStorage.members.length === gameStorage.activeMember + 1 ? 'Начинаем!' : 'Следующий'}
                     </Button>
                 </Div>
             </Group>
@@ -136,4 +136,4 @@ function HomePanelPlaceholder({ router }) {
     )
 }
 //var(--destructive)
-export default withRouter(HomePanelPlaceholder);
+export default withRouter(Start);
